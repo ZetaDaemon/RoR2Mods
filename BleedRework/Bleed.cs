@@ -15,39 +15,51 @@ namespace BleedRework
 {
     public class Bleed
     {
-        internal static readonly float TritipBleedDamage_Default = 0.2f;
-        internal static readonly float SpleenBleedDamage_Default = 0.4f;
-        internal static readonly float SpleenExplosionDamage_Default = 1f;
-        internal static readonly float ThornBleedDamage_Default = 0.2f;
-        static readonly float BleedDuration_Default = 3f;
-        static readonly float BleedTickInterval_Default = 0.333f;
-        static readonly float SuperBleedDuration_Default = 6f;
-        static readonly float SuperBleedFactor_Default = 6f;
-        static readonly float SuperBleedTickInterval_Default = 0.2f;
+        internal static float TritipBleedDamage;
 
-        internal static float TritipBleedDamage = TritipBleedDamage_Default;
-        internal static float SpleenBleedDamage = SpleenBleedDamage_Default;
-        internal static float SpleenExplosionDamage = SpleenExplosionDamage_Default;
-        internal static float ThornBleedDamage = ThornBleedDamage_Default;
-        static readonly float BleedDuration = BleedDuration_Default;
-        static readonly float BleedTickInterval = BleedTickInterval_Default;
-        static readonly float SuperBleedDuration = SuperBleedDuration_Default;
-        static readonly float SuperBleedFactor = SuperBleedFactor_Default;
-        static readonly float SuperBleedTickInterval = SuperBleedTickInterval_Default;
+        internal static float SpleenBleedDamage;
+        internal static float SpleenExplosionDamage;
+
+        internal static float ThornBleedDamage;
+
+        static readonly float BleedDuration;
+        static readonly float BleedTickInterval;
+
+        static readonly float SuperBleedDuration;
+        static readonly float SuperBleedTickInterval;
+        static readonly float SuperBleedFactor;
 
         static Bleed()
         {
+            BleedDuration = Configs.BindToConfig("Bleed", "Duration", 3);
+            BleedTickInterval = Configs.BindToConfig("Bleed", "Tick Interval", 0.333f);
+
+            SuperBleedDuration = Configs.BindToConfig("Hemmorage", "Duration", 6);
+            SuperBleedTickInterval = Configs.BindToConfig("Hemmorage", "Tick Interval", 0.2f);
+            SuperBleedFactor = Configs.BindToConfig("Hemmorage", "Damage", 6);
+
+            TritipBleedDamage = Configs.BindToConfig("Tritip", "Bleed Damage", 0.2f);
+            SpleenBleedDamage = Configs.BindToConfig("Shatterspleen", "Bleed Damage", 0.4f);
+            SpleenExplosionDamage = Configs.BindToConfig("Shatterspleen", "Explosion Damage", 1f);
+            ThornBleedDamage = Configs.BindToConfig("Noxious Thorn", "Bleed Damage", 0.2f);
+
             On.RoR2.DotController.InitDotCatalog += DotController_InitDotCatalog;
 
             On.RoR2.GlobalEventManager.ProcessHitEnemy += GlobalEventManager_ProcessHitEnemy;
-            IL.RoR2.GlobalEventManager.ProcessHitEnemy += new ILContext.Manipulator(IL_ProcessHitEnemy);
+            IL.RoR2.GlobalEventManager.ProcessHitEnemy += new ILContext.Manipulator(
+                IL_ProcessHitEnemy
+            );
 
             On.RoR2.GlobalEventManager.OnCharacterDeath += GlobalEventManager_OnCharacterDeath;
-            IL.RoR2.GlobalEventManager.OnCharacterDeath += new ILContext.Manipulator(IL_OnCharacterDeath);
+            IL.RoR2.GlobalEventManager.OnCharacterDeath += new ILContext.Manipulator(
+                IL_OnCharacterDeath
+            );
 
             On.RoR2.CharacterBody.TriggerEnemyDebuffs += CharacterBody_TriggerEnemyDebuffs;
 
-            IL.RoR2.DotController.AddDot_GameObject_float_HurtBox_DotIndex_float_Nullable1_Nullable1_Nullable1 +=
+            IL.RoR2
+                .DotController
+                .AddDot_GameObject_float_HurtBox_DotIndex_float_Nullable1_Nullable1_Nullable1 +=
                 new ILContext.Manipulator(IL_AddDot);
 
             LanguageAPI.Add(
@@ -55,7 +67,10 @@ namespace BleedRework
                 $"Attacks <style=cIsDamage>bleed</style> enemies for <style=cIsDamage>{TritipBleedDamage * 100}%</style> "
                     + $"<style=cStack>(+{TritipBleedDamage * 100}% per stack)</style> TOTAL damage."
             );
-            LanguageAPI.Add("ITEM_BLEEDONHIT_PICKUP", $"Deal +{TritipBleedDamage}% damage as bleed over time.");
+            LanguageAPI.Add(
+                "ITEM_BLEEDONHIT_PICKUP",
+                $"Deal +{TritipBleedDamage}% damage as bleed over time."
+            );
 
             LanguageAPI.Add(
                 "ITEM_BLEEDONHITANDEXPLODE_DESC",
@@ -82,7 +97,9 @@ namespace BleedRework
             );
         }
 
-        internal static void DotController_InitDotCatalog(On.RoR2.DotController.orig_InitDotCatalog orig)
+        internal static void DotController_InitDotCatalog(
+            On.RoR2.DotController.orig_InitDotCatalog orig
+        )
         {
             orig();
             DotController.DotDef bleed = DotController.dotDefs[(int)DotController.DotIndex.Bleed];
@@ -90,7 +107,9 @@ namespace BleedRework
             bleed.interval = BleedTickInterval;
             bleed.resetTimerOnAdd = false;
 
-            DotController.DotDef superBleed = DotController.dotDefs[(int)DotController.DotIndex.SuperBleed];
+            DotController.DotDef superBleed = DotController.dotDefs[
+                (int)DotController.DotIndex.SuperBleed
+            ];
             superBleed.damageCoefficient = 1;
             superBleed.interval = SuperBleedTickInterval;
             superBleed.resetTimerOnAdd = false;
@@ -108,7 +127,9 @@ namespace BleedRework
                 return;
             }
             int tritipCount = inventory.GetItemCountEffective(RoR2Content.Items.BleedOnHit);
-            int spleenCount = inventory.GetItemCountEffective(RoR2Content.Items.BleedOnHitAndExplode);
+            int spleenCount = inventory.GetItemCountEffective(
+                RoR2Content.Items.BleedOnHitAndExplode
+            );
 
             float bleedFactor = 0;
             bool isBleedOnHitDamage = (damageInfo.damageType & DamageType.BleedOnHit) != 0;
@@ -135,7 +156,10 @@ namespace BleedRework
                 && !sawmerangComponent.isStunAndPierce
             )
             {
-                if (inventory.GetEquipmentIndex() == RoR2Content.Equipment.Saw.equipmentIndex || isBleedOnHitDamage)
+                if (
+                    inventory.GetEquipmentIndex() == RoR2Content.Equipment.Saw.equipmentIndex
+                    || isBleedOnHitDamage
+                )
                 {
                     damageInfo.procChainMask.AddProc(ProcType.BleedOnHit);
                     bleedFactor += 0.2f;
@@ -146,7 +170,11 @@ namespace BleedRework
                 return;
             }
             float bleedDamage =
-                damageInfo.damage / characterBody.damage * bleedFactor * BleedTickInterval / BleedDuration;
+                damageInfo.damage
+                / characterBody.damage
+                * bleedFactor
+                * BleedTickInterval
+                / BleedDuration;
             if (damageInfo.crit)
             {
                 bleedDamage *= characterBody.critMultiplier;
@@ -244,7 +272,10 @@ namespace BleedRework
             return totalDamage;
         }
 
-        static float GetDotTotalDamagePerTick(DotController controller, List<DotController.DotIndex> indexes)
+        static float GetDotTotalDamagePerTick(
+            DotController controller,
+            List<DotController.DotIndex> indexes
+        )
         {
             float totalDamage = 0;
             foreach (DotController.DotStack stack in controller.dotStackList)
@@ -261,7 +292,12 @@ namespace BleedRework
         static void DoDeathExplosion(GlobalEventManager self, DamageReport damageReport)
         {
             CharacterBody victimBody = damageReport.victimBody;
-            if (!(victimBody.HasBuff(RoR2Content.Buffs.Bleeding) || victimBody.HasBuff(RoR2Content.Buffs.SuperBleed)))
+            if (
+                !(
+                    victimBody.HasBuff(RoR2Content.Buffs.Bleeding)
+                    || victimBody.HasBuff(RoR2Content.Buffs.SuperBleed)
+                )
+            )
             {
                 return;
             }
@@ -274,7 +310,9 @@ namespace BleedRework
             }
             CharacterMaster attackerMaster = attackerBody.master;
             Inventory attackerInventory = attackerMaster.inventory;
-            int spleenCount = attackerInventory.GetItemCountEffective(RoR2Content.Items.BleedOnHitAndExplode);
+            int spleenCount = attackerInventory.GetItemCountEffective(
+                RoR2Content.Items.BleedOnHitAndExplode
+            );
             if (spleenCount <= 0)
             {
                 return;
@@ -302,7 +340,8 @@ namespace BleedRework
             );
             DelayBlast delayBlast = explosionObj.GetComponent<DelayBlast>();
             delayBlast.position = spawnPosition;
-            delayBlast.baseDamage = totalBleedDamage / BleedTickInterval * SpleenExplosionDamage * spleenCount;
+            delayBlast.baseDamage =
+                totalBleedDamage / BleedTickInterval * SpleenExplosionDamage * spleenCount;
             delayBlast.baseForce = 0f;
             delayBlast.radius = 16f;
             delayBlast.attacker = damageReport.attacker;
@@ -345,13 +384,17 @@ namespace BleedRework
             DamageReport damageReport
         )
         {
-            int itemCountEffective = self.inventory.GetItemCountEffective(DLC2Content.Items.TriggerEnemyDebuffs);
+            int itemCountEffective = self.inventory.GetItemCountEffective(
+                DLC2Content.Items.TriggerEnemyDebuffs
+            );
             if (itemCountEffective == 0)
             {
                 return;
             }
             List<VineOrb.SplitDebuffInformation> list = [];
-            DotController dotController = DotController.FindDotController(damageReport.victimBody.gameObject);
+            DotController dotController = DotController.FindDotController(
+                damageReport.victimBody.gameObject
+            );
             BuffIndex[] debuffAndDotsIndicesExcludingNoxiousThorns =
                 BuffCatalog.debuffAndDotsIndicesExcludingNoxiousThorns;
             foreach (BuffIndex buffIndex in debuffAndDotsIndicesExcludingNoxiousThorns)
@@ -368,7 +411,10 @@ namespace BleedRework
                     {
                         DotController.DotIndex dotDefIndex = DotController.GetDotDefIndex(buffDef);
                         DotController.GetDotDef(dotDefIndex);
-                        isTimed = dotController.GetDotStackTotalDurationForIndex(dotDefIndex, out totalDuration);
+                        isTimed = dotController.GetDotStackTotalDurationForIndex(
+                            dotDefIndex,
+                            out totalDuration
+                        );
                         damageMultiplier =
                             GetDotTotalDamagePerTick(dotController, [dotDefIndex])
                             / buffCount
@@ -404,7 +450,9 @@ namespace BleedRework
             sphereSearch.radius = 20f + 5f * (float)(itemCountEffective - 1);
             sphereSearch.queryTriggerInteraction = QueryTriggerInteraction.UseGlobal;
             sphereSearch.RefreshCandidates();
-            sphereSearch.FilterCandidatesByHurtBoxTeam(TeamMask.GetEnemyTeams(self.teamComponent.teamIndex));
+            sphereSearch.FilterCandidatesByHurtBoxTeam(
+                TeamMask.GetEnemyTeams(self.teamComponent.teamIndex)
+            );
             sphereSearch.OrderCandidatesByDistance();
             sphereSearch.FilterCandidatesByDistinctHurtBoxEntities();
             sphereSearch.GetHurtBoxes(list2);
@@ -466,7 +514,13 @@ namespace BleedRework
         private static void IL_OnCharacterDeath(ILContext il)
         {
             ILCursor ilcursor = new(il);
-            if (!ilcursor.TryGotoNext(x => x.MatchLdloc(57), x => x.MatchLdcI4(0), x => x.MatchBle(out _)))
+            if (
+                !ilcursor.TryGotoNext(
+                    x => x.MatchLdloc(57),
+                    x => x.MatchLdcI4(0),
+                    x => x.MatchBle(out _)
+                )
+            )
             {
                 MainPlugin.ModLogger.LogError("Spleen IL Hook Failed");
                 return;

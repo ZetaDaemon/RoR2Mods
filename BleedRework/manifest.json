@@ -1,0 +1,9 @@
+{
+    "name": "Bleed Rework",
+    "version_number": "1.0.0",
+    "website_url": "https://github.com/ZetaDaemon/RoR2Mods/tree/main",
+    "description": "Reworks bleed to be based on damage dealt.",
+    "dependencies": [
+        "RiskofThunder-R2API_Language-1.1.0"
+    ]
+}

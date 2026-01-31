@@ -1,15 +1,10 @@
-﻿
-using BepInEx;
+﻿using BepInEx;
 using R2API;
 
 namespace BleedRework
 {
-    [BepInDependency(DotAPI.PluginGUID)]
-
     [BepInDependency(LanguageAPI.PluginGUID)]
-
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
-
     public class MainPlugin : BaseUnityPlugin
     {
         public const string PluginGUID = PluginAuthor + "." + PluginName;
@@ -27,6 +22,7 @@ namespace BleedRework
             Configs.Setup();
             EnableChanges();
         }
+
         private void EnableChanges()
         {
             new Bleed();
